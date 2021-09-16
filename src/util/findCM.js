@@ -4,7 +4,7 @@ const fs = require("fs");
 const directoryPath = path.join(__dirname, "../../public/CANDY_MACHINE_CONFIG");
 fs.readdir(directoryPath, function(err, files) {
   if (err) {
-    console.error("Unable to scan CANDY_MACHINE_CONFIG directory: " + err);
+    console.error("Unable to scan CANDY_MACHINE_CONFIG directory, check r/w permissions?: " + err);
     process.exit(1);
   }
 
@@ -14,7 +14,7 @@ fs.readdir(directoryPath, function(err, files) {
 
       fs.writeFileSync("src/cm.json", `{ "cm": "${file}" }`, function(err) {
         if (err) {
-          console.error("Unable to write cm.json: " + err);
+          console.error("Unable to write cm.json, check r/w permissions?: " + err);
           process.exit(1);
         }
       });
@@ -23,5 +23,6 @@ fs.readdir(directoryPath, function(err, files) {
     }
   });
 
-  console.error("CANDY_MACHINE_CONFIG is empty. It should contain the file that 'candy-machine upload' generated into .cache.");
+  console.error("CANDY_MACHINE_CONFIG is empty. It should contain the file inside the .cache folder that 'candy-machine upload' generated.");
+  process.exit(1);
 });
