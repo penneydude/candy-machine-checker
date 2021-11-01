@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import styled, { createGlobalStyle } from 'styled-components';
 
@@ -16,7 +16,60 @@ const GlobalStyle = createGlobalStyle`
 
 const TopInfo = styled.div`
   width: 100%;
-`
+  height: 72px;
+  position: fixed;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin-bottom: -72px;
+  font-size: 18px;
+  z-index: 10;
+
+  & span {
+    display: flex;
+    flex-flow:row nowrap;
+  }
+
+  & input {
+    text-align: center;
+    border: none;
+    border-bottom: 1px solid #000;
+    font-size: 18px;
+    transition: all 0.2s ease-in-out;
+  }
+
+  ${props => props.darkMode && `
+    color: #fff;
+
+    & input {
+      color: #fff;
+      background-color: #111;
+      border-bottom-color: #fff;
+    }
+  `}
+`;
+
+const BottomInfo = styled.div`
+  width: 100%;
+  height: 48px;
+  position: fixed;
+  bottom: 0;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-around;
+  align-items: center;
+  text-align: center;
+  margin-top: -48px;
+  font-size: 12px;
+
+  & span {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 4px 8px;
+  }
+`;
 
 const Container = styled.div`
   width: 100%;
@@ -90,18 +143,37 @@ function App() {
   const [cm, setCm] = useState({});
   const [currItem, setCurrItem] = useState({});
   const [index, setIndex] = useState(0);
+  const [textVal, setTextVal] = useState(1);
   const [imageLoaded, setImageLoaded] = useState(false);
 
+  const cmRef = useRef(cm);
+
   const keyHandler = ({ key }) => {
+    const numItems = cmRef.current?.items ? Object.keys(cmRef.current.items).length : 0;
+
     if (key === ' ') {
       setDarkMode(d => !d);
     }
     if (key === 'ArrowLeft') {
-      setIndex(i => i - 1);
+      setIndex(i => i > 0 ? i - 1 : i);
     }
     if (key === 'ArrowRight') {
-      setIndex(i => i + 1);
+      setIndex(i => i < (numItems - 1) ? i + 1 : i);
     }
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (e.target?.[0]?.value)
+      setIndex(Math.min(e.target.value - 1, numItems - 1));
+  }
+
+  const handleBlur = (e) => {
+    e.preventDefault();
+
+    if (e.target?.value) {}
+      setIndex(Math.min(e.target.value - 1, numItems - 1));
   }
 
   // Get CM config
@@ -117,7 +189,14 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    setTextVal(index + 1);
+  }, [index]);
+
   const items = cm.items;
+  cmRef.current = cm;
+
+  const numItems = cm?.items ? Object.keys(cm.items).length : 0;
 
   // Get CM item from Arweave
   useEffect(() => {
@@ -131,8 +210,19 @@ function App() {
   return (
     <>
       <GlobalStyle darkMode={darkMode} />
-      <TopInfo>
-
+      <TopInfo darkMode={darkMode}>
+        <span>
+          <form onSubmit={(e) => handleSubmit(e)}>
+            <input
+              type="number"
+              value={textVal}
+              min={1}
+              max={numItems}
+              onChange={(e) => setTextVal(Math.max(Math.min(e.target.value, numItems), 0))}
+              onBlur={(e) => handleBlur(e)} />
+          </form>
+          /{numItems}
+        </span>
       </TopInfo>
 
       <Container>
@@ -165,6 +255,12 @@ function App() {
           </>
         )}
       </Container>
+
+      <BottomInfo>
+        <p><span>left</span> – prev</p>
+        <p><span>space</span> – light/dark mode</p>
+        <p><span>right</span> – next</p>
+      </BottomInfo>
     </>
   );
 }
