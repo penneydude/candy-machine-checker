@@ -166,14 +166,14 @@ function App() {
     e.preventDefault();
 
     if (e.target?.[0]?.value)
-      setIndex(Math.min(e.target.value - 1, numItems - 1));
+      setIndex(Math.min(parseInt(e.target[0].value, 10) - 1, numItems - 1));
   }
 
   const handleBlur = (e) => {
     e.preventDefault();
 
     if (e.target?.value) {}
-      setIndex(Math.min(e.target.value - 1, numItems - 1));
+      setIndex(Math.min(parseInt(e.target.value, 10) - 1, numItems - 1));
   }
 
   // Get CM config
